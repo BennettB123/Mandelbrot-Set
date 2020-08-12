@@ -5,13 +5,22 @@ canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
 // GLOBAL VARIABLES
-var START_MIN_X = -2.25;
-var START_MAX_X = .75;
-var START_MIN_Y = -1.5;
-var START_MAX_Y = 1.5;
+var MIN_X = -2.25;
+var MAX_X = .75;
+var MIN_Y = -1.25;
+var MAX_Y = 1.25;
+var MANDELBROT_ASPECT_RATIO = (MAX_X - MIN_X) / (MAX_Y - MIN_Y);
+var CANVAS_ASPECT_RATIO = canvas.width / canvas.height;
+
+var START_MIN_X;
+var START_MAX_X;
+var START_MIN_Y;
+var START_MAX_Y;
+setStartCoords(CANVAS_ASPECT_RATIO, MANDELBROT_ASPECT_RATIO);
+
 var undoStack = []; //contains previous min/max x & y values in order to undo a zoom
-var MAX_ITERATIONS = 150;
-var scaleFactor = 1;
+var MAX_ITERATIONS = 10;
+var scaleFactor = 10;
 
 var curMinX = START_MIN_X;
 var curMinY = START_MIN_Y;
@@ -22,13 +31,35 @@ var curMaxY = START_MAX_Y;
 function resized(){
     canvas.width = window.innerWidth;
     canvas.height = window.innerHeight;
-    drawMandelbrotSet(curMinX, curMinY, curMaxX, curMaxY);
+    CANVAS_ASPECT_RATIO = canvas.width / canvas.height;
+    setStartCoords(CANVAS_ASPECT_RATIO, MANDELBROT_ASPECT_RATIO);
+    drawMandelbrotSet(START_MIN_X, START_MIN_Y, START_MAX_X, START_MAX_Y);
 }
 var resize;
 window.onresize = function(){
   clearTimeout(resize);
-  resize = setTimeout(resized, 100);
+  resize = setTimeout(resized, 1);
 };
+
+// Calculates and sets the starting coordinates for the mandelbrot set
+// This function is to make the whole Mandelbrot set visible on the screen,
+// while maintaining a correct aspect ratio so it does not appear stretched.
+function setStartCoords(canvas_aspect_ratio, mandelbrot_aspect_ratio) {
+    // for wide displays (desktop)
+    if (canvas_aspect_ratio >= mandelbrot_aspect_ratio) {
+        START_MIN_X = (MIN_X * (canvas_aspect_ratio / mandelbrot_aspect_ratio));
+        START_MAX_X = MAX_X * (canvas_aspect_ratio / mandelbrot_aspect_ratio);
+        START_MIN_Y = MIN_Y;
+        START_MAX_Y = MAX_Y;
+    }
+    // for tall displays (mobile)
+    else {
+        START_MIN_X = MIN_X;
+        START_MAX_X = MAX_X;
+        START_MIN_Y = MIN_Y * (mandelbrot_aspect_ratio / canvas_aspect_ratio);
+        START_MAX_Y = MAX_Y * (mandelbrot_aspect_ratio / canvas_aspect_ratio);
+    }
+}
 
 // Helper function to scale a value from one range of numbers to different range of numbers
 function scale(num, in_min, in_max, out_min, out_max) {
