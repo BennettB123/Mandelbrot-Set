@@ -3,6 +3,11 @@ html, body {
   padding: 0;
 }
 
-canvas {
+#html-canvas {
   position: absolute;
+}
+
+#html-canvas-top-layer {
+  position: absolute;
+  z-index: 1;
 }
