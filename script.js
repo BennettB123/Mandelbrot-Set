@@ -25,8 +25,8 @@ var START_MAX_Y;
 setStartCoords(CANVAS_ASPECT_RATIO, MANDELBROT_ASPECT_RATIO);
 
 var undoStack = []; //contains previous min/max x & y values in order to undo a zoom
-var MAX_ITERATIONS = 200;
-var scaleFactor = 1;
+var MAX_ITERATIONS = 100;
+var scaleFactor = 5;
 
 var curMinX = START_MIN_X;
 var curMinY = START_MIN_Y;
@@ -69,7 +69,6 @@ window.addEventListener('mousedown', function(event) {
 });
 window.addEventListener('touchstart', function(event) {
     event.preventDefault();
-    event.stopPropagation();
 
     dragStartScreenLocX = event.touches[0].clientX;
     dragStartScreenLocY = event.touches[0].clientY;
@@ -77,7 +76,7 @@ window.addEventListener('touchstart', function(event) {
     dragStartX = coords.x;
     dragStartY = coords.y;
     mouseDown = true;
-});
+}, { passive: false });
 
 // Event listeners to listen for when a mouse/touch is moved
 // This will draw a box between the initial touch point and the current point
@@ -92,7 +91,6 @@ window.addEventListener('mousemove', function(event) {
 });
 window.addEventListener('touchmove', function(event) {
     event.preventDefault();
-    event.stopPropagation();
 
     // clear top layer canvas and draw a rectangle
     if(mouseDown){
@@ -104,7 +102,7 @@ window.addEventListener('touchmove', function(event) {
         context2.lineWidth = 3;
         context2.strokeRect(dragStartScreenLocX, dragStartScreenLocY, event.touches[0].clientX - dragStartScreenLocX, event.touches[0].clientY - dragStartScreenLocY);
     }
-});
+}, { passive: false });
 
 // Event listeners to listen for when a mouse/touch is ended
 // This will also redraw the Mandelbrot set to reflect the 
@@ -124,7 +122,6 @@ window.addEventListener('mouseup', function(event) {
 });
 window.addEventListener('touchend', function() {
     event.preventDefault();
-    event.stopPropagation();
 
     context2.clearRect(0, 0, canvas2.width, canvas2.height);
     mouseDown = false;
@@ -138,7 +135,7 @@ window.addEventListener('touchend', function() {
 
     // re-draw mandelbrot
     drawMandelbrotSet(curMinX, curMinY, curMaxX, curMaxY);
-});
+}, { passive: false });
 
 // Calculates and sets the starting coordinates for the mandelbrot set
 // This function is to make the whole Mandelbrot set visible on the screen,
