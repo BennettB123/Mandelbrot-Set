@@ -68,14 +68,16 @@ window.addEventListener('mousedown', function(event) {
     mouseDown = true;
 });
 window.addEventListener('touchstart', function(event) {
-    console.log(event);
+    event.preventDefault();
+    event.stopPropagation();
+
     dragStartScreenLocX = event.touches[0].clientX;
     dragStartScreenLocY = event.touches[0].clientY;
     var coords = screenLocationToCoords(event.touches[0].clientX, event.touches[0].clientY);
     dragStartX = coords.x;
     dragStartY = coords.y;
     mouseDown = true;
-}, { passive: false });
+});
 
 // Event listeners to listen for when a mouse/touch is moved
 // This will draw a box between the initial touch point and the current point
@@ -89,6 +91,9 @@ window.addEventListener('mousemove', function(event) {
     }
 });
 window.addEventListener('touchmove', function(event) {
+    event.preventDefault();
+    event.stopPropagation();
+
     // clear top layer canvas and draw a rectangle
     if(mouseDown){
         dragEndX = event.touches[0].clientX;
@@ -99,7 +104,7 @@ window.addEventListener('touchmove', function(event) {
         context2.lineWidth = 3;
         context2.strokeRect(dragStartScreenLocX, dragStartScreenLocY, event.touches[0].clientX - dragStartScreenLocX, event.touches[0].clientY - dragStartScreenLocY);
     }
-}, { passive: false });
+});
 
 // Event listeners to listen for when a mouse/touch is ended
 // This will also redraw the Mandelbrot set to reflect the 
@@ -118,6 +123,9 @@ window.addEventListener('mouseup', function(event) {
     drawMandelbrotSet(curMinX, curMinY, curMaxX, curMaxY);
 });
 window.addEventListener('touchend', function() {
+    event.preventDefault();
+    event.stopPropagation();
+
     context2.clearRect(0, 0, canvas2.width, canvas2.height);
     mouseDown = false;
 
@@ -130,7 +138,7 @@ window.addEventListener('touchend', function() {
 
     // re-draw mandelbrot
     drawMandelbrotSet(curMinX, curMinY, curMaxX, curMaxY);
-}, { passive: false });
+});
 
 // Calculates and sets the starting coordinates for the mandelbrot set
 // This function is to make the whole Mandelbrot set visible on the screen,
