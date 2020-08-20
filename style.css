@@ -11,3 +11,42 @@ html, body {
   position: absolute;
   z-index: 1;
 }
+
+#controls {
+  position: absolute;
+  z-index: 1;
+  height: 6%;
+  width: 75%;
+  margin: 5px auto;
+  padding: 5px;
+
+  bottom: 5px;
+  left: 50%;
+  transform: translate(-50%);
+
+  color: #fff;
+  background-color: rgba(0,0,0,.75);
+
+  display: flex;
+  align-items: center;
+  justify-content: space-evenly;
+}
+
+#undo_svg {
+  height: 75%;
+}
+
+#refresh_svg {
+  height: 75%;
+}
+
+#slide_container {
+  font-size: 100%;
+  text-align: center;
+}
+
+#resolution_slider {
+  height: 20px;
+  width: 200px;
+  direction: rtl;
+}

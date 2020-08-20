@@ -4,7 +4,7 @@ var context = canvas.getContext('2d');
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
-// Second canvas layer is used to draw rectangles for zooming in
+// Second canvas layer is used to draw rectangles to show where you are zooming in
 var canvas2 = document.getElementById('html-canvas-top-layer');
 var context2 = canvas2.getContext('2d');
 canvas2.width = window.innerWidth;
@@ -32,190 +32,6 @@ var curMinX = START_MIN_X;
 var curMinY = START_MIN_Y;
 var curMaxX = START_MAX_X;
 var curMaxY = START_MAX_Y;
-
-// Event listener to listen to change canvas size when window size changes
-function resized(){
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-    canvas2.width = window.innerWidth;
-    canvas2.height = window.innerHeight;
-    CANVAS_ASPECT_RATIO = canvas.width / canvas.height;
-
-    setStartCoords(CANVAS_ASPECT_RATIO, MANDELBROT_ASPECT_RATIO);
-    drawMandelbrotSet(START_MIN_X, START_MIN_Y, START_MAX_X, START_MAX_Y);
-}
-var resize;
-window.addEventListener('resize', function(){
-    clearTimeout(resize);
-    resize = setTimeout(resized, 100);
-});
-
-var dragStartX;
-var dragStartY;
-var dragEndX;
-var dragEndY;
-var mouseDown = false;
-
-// Event listeners to listen for when a mouse/touch is started
-window.addEventListener('mousedown', function(event) {
-    dragStartX = event.clientX;
-    dragStartY = event.clientY;
-    mouseDown = true;
-});
-window.addEventListener('touchstart', function(event) {
-    event.preventDefault();
-
-    dragStartX = event.touches[0].clientX;
-    dragStartY = event.touches[0].clientY;
-    mouseDown = true;
-}, { passive: false });
-
-// Event listeners to listen for when a mouse/touch is moved
-// This will draw a box between the initial touch point and the current point,
-// While maintaining the screens aspect ratio, to preserve the Mandelbrot set's aspect ratio
-window.addEventListener('mousemove', function(event) {
-    // clear top layer canvas and draw a rectangle
-    if(mouseDown){
-        let rectX = dragStartX;
-        let rectY = dragStartY;
-        let rectHeight, rectWidth;
-
-        // Complicated logic to keep aspect ratio
-        if(event.clientX < dragStartX) {
-            rectWidth = (dragStartX - event.clientX);
-        }
-        else {
-            rectWidth = event.clientX - rectX;
-        }
-
-        if(event.clientY < dragStartY) {
-            rectHeight = -(dragStartY - event.clientY);
-        }
-        else {
-            rectHeight = event.clientY - rectY;
-        }
-        if(CANVAS_ASPECT_RATIO > 1) {
-            if (event.clientY < dragStartY) {
-                rectHeight = -rectWidth / CANVAS_ASPECT_RATIO;
-            }
-            else {
-                rectHeight = rectWidth / CANVAS_ASPECT_RATIO;
-            }
-            if (event.clientX < dragStartX) {
-                rectHeight *= -1;
-            }
-        }
-        else {
-            if (event.clientX < dragStartX) {
-                rectWidth = -rectHeight * CANVAS_ASPECT_RATIO;
-            }
-            else {
-                rectWidth = rectHeight * CANVAS_ASPECT_RATIO;
-            }
-            if (event.clientY < dragStartY) {
-                rectWidth *= -1;
-            }
-        }
-
-        context2.clearRect(0, 0, canvas2.width, canvas2.height);
-        context2.strokeStyle = 'rgba(255,255,255)';
-        context2.lineWidth = 3;
-        context2.strokeRect(rectX, rectY, rectWidth, rectHeight);
-
-        dragEndX = rectX + rectWidth;
-        dragEndY = rectY + rectHeight;
-    }
-});
-window.addEventListener('touchmove', function(event) {
-    event.preventDefault();
-
-    // clear top layer canvas and draw a rectangle
-    if(mouseDown){
-        let rectX = dragStartX;
-        let rectY = dragStartY;
-        let rectHeight, rectWidth;
-
-        // Complicated logic to keep aspect ratio
-        if(event.touches[0].clientX < dragStartX) {
-            rectWidth = (dragStartX - event.touches[0].clientX);
-        }
-        else {
-            rectWidth = event.touches[0].clientX - rectX;
-        }
-
-        if(event.touches[0].clientY < dragStartY) {
-            rectHeight = -(dragStartY - event.touches[0].clientY);
-        }
-        else {
-            rectHeight = event.touches[0].clientY - rectY;
-        }
-        if(CANVAS_ASPECT_RATIO > 1) {
-            if (event.touches[0].clientY < dragStartY) {
-                rectHeight = -rectWidth / CANVAS_ASPECT_RATIO;
-            }
-            else {
-                rectHeight = rectWidth / CANVAS_ASPECT_RATIO;
-            }
-            if (event.touches[0].clientX < dragStartX) {
-                rectHeight *= -1;
-            }
-        }
-        else {
-            if (event.touches[0].clientX < dragStartX) {
-                rectWidth = -rectHeight * CANVAS_ASPECT_RATIO;
-            }
-            else {
-                rectWidth = rectHeight * CANVAS_ASPECT_RATIO;
-            }
-            if (event.touches[0].clientY < dragStartY) {
-                rectWidth *= -1;
-            }
-        }
-
-        context2.clearRect(0, 0, canvas2.width, canvas2.height);
-        context2.strokeStyle = 'rgba(255,255,255)';
-        context2.lineWidth = 3;
-        context2.strokeRect(rectX, rectY, rectWidth, rectHeight);
-
-        dragEndX = rectX + rectWidth;
-        dragEndY = rectY + rectHeight;
-    }
-}, { passive: false });
-
-// Event listeners to listen for when a mouse/touch is ended
-// This will also redraw the Mandelbrot set to reflect the 
-window.addEventListener('mouseup', function(event) {
-    context2.clearRect(0, 0, canvas2.width, canvas2.height);
-    mouseDown = false;
-
-    // set new current coordinates (also check to ensure that minX < maxX etc...)
-    var startCoords = screenLocationToCoords(dragStartX, dragStartY);
-    var endCoords = screenLocationToCoords(dragEndX, dragEndY);
-    curMinX = Math.min(startCoords.x, endCoords.x);
-    curMinY = Math.min(startCoords.y, endCoords.y);
-    curMaxX = Math.max(startCoords.x, endCoords.x);
-    curMaxY = Math.max(startCoords.y, endCoords.y);
-
-    // re-draw mandelbrot
-    drawMandelbrotSet(curMinX, curMinY, curMaxX, curMaxY);
-});
-window.addEventListener('touchend', function() {
-    event.preventDefault();
-
-    context2.clearRect(0, 0, canvas2.width, canvas2.height);
-    mouseDown = false;
-
-    // set new current coordinates (also check to ensure that minX < maxX etc...)
-    var startCoords = screenLocationToCoords(dragStartX, dragStartY);
-    var endCoords = screenLocationToCoords(dragEndX, dragEndY);
-    curMinX = Math.min(startCoords.x, endCoords.x);
-    curMinY = Math.min(startCoords.y, endCoords.y);
-    curMaxX = Math.max(startCoords.x, endCoords.x);
-    curMaxY = Math.max(startCoords.y, endCoords.y);
-
-    // re-draw mandelbrot
-    drawMandelbrotSet(curMinX, curMinY, curMaxX, curMaxY);
-}, { passive: false });
 
 // Calculates and sets the starting coordinates for the mandelbrot set
 // This function is to make the whole Mandelbrot set visible on the screen,
@@ -288,8 +104,216 @@ function drawMandelbrotSet(minR, minC, maxR, maxC) {
             context.fillRect(row*scaleFactor, col*scaleFactor, scaleFactor, scaleFactor);
         }
     }
-
-    undoStack.push([minR, minC, maxR, maxC]);
 }
 
+function undo() {
+    if(undoStack.length){
+        [curMinX, curMinY, curMaxX, curMaxY] = undoStack.pop();
+        drawMandelbrotSet(curMinX, curMinY, curMaxX, curMaxY);
+    }
+}
+
+function refresh() {
+    undoStack = [];
+    curMinX = START_MIN_X;
+    curMinY = START_MIN_Y;
+    curMaxX = START_MAX_X;
+    curMaxY = START_MAX_Y;
+    drawMandelbrotSet(curMinX, curMinY, curMaxX, curMaxY);
+}
+
+/////////////////////////////////////////////////////////////////////////////
+////////////////////////////// EVENT LISTENERS //////////////////////////////
+/////////////////////////////////////////////////////////////////////////////
+
+// Event listener to listen to change canvas size when window size changes
+function resized(){
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    canvas2.width = window.innerWidth;
+    canvas2.height = window.innerHeight;
+    CANVAS_ASPECT_RATIO = canvas.width / canvas.height;
+
+    setStartCoords(CANVAS_ASPECT_RATIO, MANDELBROT_ASPECT_RATIO);
+    refresh();
+}
+var resize;
+window.addEventListener('resize', function(){
+    clearTimeout(resize);
+    resize = setTimeout(resized, 100);
+});
+
+var dragStartX;
+var dragStartY;
+var dragEndX;
+var dragEndY;
+var mouseDown = false;
+
+// Event listeners to listen for when a mouse/touch is started
+window.addEventListener('mousedown', function(event) {
+    if(event.target.tagName == 'CANVAS') {
+        dragStartX = event.clientX;
+        dragStartY = event.clientY;
+        mouseDown = true;
+    }
+});
+window.addEventListener('touchstart', function(event) {
+    event.preventDefault();
+
+    if(event.target.tagName == 'CANVAS') {
+        dragStartX = event.touches[0].clientX;
+        dragStartY = event.touches[0].clientY;
+        mouseDown = true;
+    }
+}, { passive: false });
+
+// Event listeners to listen for when a mouse/touch is moved
+// This will draw a box between the initial touch point and the current point,
+// While maintaining the screens aspect ratio, to preserve the Mandelbrot set's aspect ratio
+window.addEventListener('mousemove', function(event) {
+    // clear top layer canvas and draw a rectangle
+    if(mouseDown){
+        let rectX = dragStartX;
+        let rectY = dragStartY;
+        let rectHeight, rectWidth;
+
+        // Complicated logic to keep aspect ratio
+        if(event.clientY < dragStartY) {
+            rectHeight = -(dragStartY - event.clientY);
+        }
+        else {
+            rectHeight = event.clientY - rectY;
+        }
+
+        if (event.clientX < dragStartX) {
+            rectWidth = -rectHeight * CANVAS_ASPECT_RATIO;
+        }
+        else {
+            rectWidth = rectHeight * CANVAS_ASPECT_RATIO;
+        }
+
+        if (event.clientY < dragStartY) {
+            rectWidth *= -1;
+        }
+
+        context2.clearRect(0, 0, canvas2.width, canvas2.height);
+        context2.strokeStyle = 'rgba(255,255,255)';
+        context2.lineWidth = 3;
+        context2.strokeRect(rectX, rectY, rectWidth, rectHeight);
+
+        dragEndX = rectX + rectWidth;
+        dragEndY = rectY + rectHeight;
+    }
+});
+window.addEventListener('touchmove', function(event) {
+    event.preventDefault();
+
+    // clear top layer canvas and draw a rectangle
+    if(mouseDown){
+        let rectX = dragStartX;
+        let rectY = dragStartY;
+        let rectHeight, rectWidth;
+
+        // Complicated logic to keep aspect ratio
+        if(event.touches[0].clientY < dragStartY) {
+            rectHeight = -(dragStartY - event.touches[0].clientY);
+        }
+        else {
+            rectHeight = event.touches[0].clientY - rectY;
+        }
+
+        if (event.touches[0].clientX < dragStartX) {
+            rectWidth = -rectHeight * CANVAS_ASPECT_RATIO;
+        }
+        else {
+            rectWidth = rectHeight * CANVAS_ASPECT_RATIO;
+        }
+
+        if (event.touches[0].clientY < dragStartY) {
+            rectWidth *= -1;
+        }
+
+        context2.clearRect(0, 0, canvas2.width, canvas2.height);
+        context2.strokeStyle = 'rgba(255,255,255)';
+        context2.lineWidth = 3;
+        context2.strokeRect(rectX, rectY, rectWidth, rectHeight);
+
+        dragEndX = rectX + rectWidth;
+        dragEndY = rectY + rectHeight;
+    }
+}, { passive: false });
+
+// Event listeners to listen for when a mouse/touch is ended
+// This will also redraw the Mandelbrot set to reflect the 
+window.addEventListener('mouseup', function(event) {
+    if(mouseDown){
+        context2.clearRect(0, 0, canvas2.width, canvas2.height);
+        mouseDown = false;
+    
+        // push old min/max row & col to the undo stack
+        undoStack.push([curMinX, curMinY, curMaxX, curMaxY]);
+    
+        // set new current coordinates (also check to ensure that minX < maxX etc...)
+        var startCoords = screenLocationToCoords(dragStartX, dragStartY);
+        var endCoords = screenLocationToCoords(dragEndX, dragEndY);
+        curMinX = Math.min(startCoords.x, endCoords.x);
+        curMinY = Math.min(startCoords.y, endCoords.y);
+        curMaxX = Math.max(startCoords.x, endCoords.x);
+        curMaxY = Math.max(startCoords.y, endCoords.y);
+    
+        // re-draw mandelbrot
+        drawMandelbrotSet(curMinX, curMinY, curMaxX, curMaxY);
+    }
+});
+window.addEventListener('touchend', function() {
+    event.preventDefault();
+
+    if(mouseDown){
+        context2.clearRect(0, 0, canvas2.width, canvas2.height);
+        mouseDown = false;
+    
+        // push old min/max row & col to the undo stack
+        undoStack.push([curMinX, curMinY, curMaxX, curMaxY]);
+    
+        // set new current coordinates (also check to ensure that minX < maxX etc...)
+        var startCoords = screenLocationToCoords(dragStartX, dragStartY);
+        var endCoords = screenLocationToCoords(dragEndX, dragEndY);
+        curMinX = Math.min(startCoords.x, endCoords.x);
+        curMinY = Math.min(startCoords.y, endCoords.y);
+        curMaxX = Math.max(startCoords.x, endCoords.x);
+        curMaxY = Math.max(startCoords.y, endCoords.y);
+    
+        // re-draw mandelbrot
+        drawMandelbrotSet(curMinX, curMinY, curMaxX, curMaxY);
+    }
+}, { passive: false });
+
+document.getElementById('undo_svg').addEventListener('click', function() {
+    undo();
+});
+
+document.getElementById('undo_svg').addEventListener('touchstart', function() {
+    undo();
+});
+
+document.getElementById('refresh_svg').addEventListener('click', function() {
+    refresh();
+});
+
+document.getElementById('refresh_svg').addEventListener('touchstart', function() {
+    refresh();
+});
+
+document.getElementById('resolution_slider').addEventListener('change', function(event) {
+    if (document.getElementById('resolution_slider').value != scale) {
+        scaleFactor = document.getElementById('resolution_slider').value;
+        drawMandelbrotSet(curMinX, curMinY, curMaxX, curMaxY);
+    }
+})
+
+/////////////////////////////////////////////////////////////////////////////
+/////////////////////////// END OF EVENT LISTENERS //////////////////////////
+/////////////////////////////////////////////////////////////////////////////
+
+// Draw initial Mandelbrot set
 drawMandelbrotSet(curMinX, curMinY, curMaxX, curMaxY);
