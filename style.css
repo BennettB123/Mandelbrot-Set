@@ -40,13 +40,6 @@ html, body {
   height: 75%;
 }
 
-#slide_container {
-  font-size: 100%;
-  text-align: center;
-}
-
 #resolution_slider {
-  height: 20px;
-  width: 200px;
-  direction: rtl;
+  font-size: 12px;
 }

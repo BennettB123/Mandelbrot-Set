@@ -305,7 +305,7 @@ document.getElementById('refresh_svg').addEventListener('touchstart', function()
 });
 
 document.getElementById('resolution_slider').addEventListener('change', function(event) {
-    if (document.getElementById('resolution_slider').value != scale) {
+    if (document.getElementById('resolution_slider').value != scaleFactor) {
         scaleFactor = document.getElementById('resolution_slider').value;
         drawMandelbrotSet(curMinX, curMinY, curMaxX, curMaxY);
     }
