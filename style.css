@@ -12,11 +12,11 @@ html, body {
   z-index: 1;
 }
 
-#controls {
+#controls_container {
   position: absolute;
   z-index: 1;
   height: 6%;
-  width: 75%;
+  width: 90%;
   margin: 5px auto;
   padding: 5px;
 
@@ -41,5 +41,12 @@ html, body {
 }
 
 #resolution_slider {
-  font-size: 12px;
+  height: 70%;
+  width: 33%;
+}
+
+@media only screen and (max-width: 600px) {
+  #resolution_slider {
+    font-size: 32px;
+  }
 }

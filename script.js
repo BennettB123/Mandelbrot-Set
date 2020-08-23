@@ -150,14 +150,14 @@ var dragEndY;
 var mouseDown = false;
 
 // Event listeners to listen for when a mouse/touch is started
-window.addEventListener('mousedown', function(event) {
+canvas2.addEventListener('mousedown', function(event) {
     if(event.target.tagName == 'CANVAS') {
         dragStartX = event.clientX;
         dragStartY = event.clientY;
         mouseDown = true;
     }
 });
-window.addEventListener('touchstart', function(event) {
+canvas2.addEventListener('touchstart', function(event) {
     event.preventDefault();
 
     if(event.target.tagName == 'CANVAS') {
@@ -170,7 +170,7 @@ window.addEventListener('touchstart', function(event) {
 // Event listeners to listen for when a mouse/touch is moved
 // This will draw a box between the initial touch point and the current point,
 // While maintaining the screens aspect ratio, to preserve the Mandelbrot set's aspect ratio
-window.addEventListener('mousemove', function(event) {
+canvas2.addEventListener('mousemove', function(event) {
     // clear top layer canvas and draw a rectangle
     if(mouseDown){
         let rectX = dragStartX;
@@ -205,7 +205,7 @@ window.addEventListener('mousemove', function(event) {
         dragEndY = rectY + rectHeight;
     }
 });
-window.addEventListener('touchmove', function(event) {
+canvas2.addEventListener('touchmove', function(event) {
     event.preventDefault();
 
     // clear top layer canvas and draw a rectangle
@@ -245,7 +245,7 @@ window.addEventListener('touchmove', function(event) {
 
 // Event listeners to listen for when a mouse/touch is ended
 // This will also redraw the Mandelbrot set to reflect the 
-window.addEventListener('mouseup', function(event) {
+canvas2.addEventListener('mouseup', function(event) {
     if(mouseDown){
         context2.clearRect(0, 0, canvas2.width, canvas2.height);
         mouseDown = false;
@@ -265,7 +265,7 @@ window.addEventListener('mouseup', function(event) {
         drawMandelbrotSet(curMinX, curMinY, curMaxX, curMaxY);
     }
 });
-window.addEventListener('touchend', function() {
+canvas2.addEventListener('touchend', function() {
     event.preventDefault();
 
     if(mouseDown){
